@@ -32,8 +32,9 @@ workflow CramToBamFlow {
     File ref_dict
     File input_cram
     String sample_name
-    String gotc_docker = "broadinstitute/genomes-in-the-cloud:2.3.1-1500064817"
+    String gotc_docker = "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.7-1603303710"
     Int preemptible_tries = 3
+    Boolean no_address = False
   }
 
   #converts CRAM to SAM to BAM and makes BAI
@@ -45,7 +46,8 @@ workflow CramToBamFlow {
       input_cram = input_cram,
       sample_name = sample_name,
       docker_image = gotc_docker,
-      preemptible_tries = preemptible_tries
+      preemptible_tries = preemptible_tries,
+      no_address = no_address
   }
 
   #validates Bam
@@ -53,7 +55,8 @@ workflow CramToBamFlow {
     input:
       input_bam = CramToBamTask.outputBam,
       docker_image = gotc_docker,
-      preemptible_tries = preemptible_tries
+      preemptible_tries = preemptible_tries,
+      no_address = no_address
   }
 
   #Outputs Bam, Bai, and validation report to the FireCloud data model
@@ -80,6 +83,7 @@ task CramToBamTask {
     Int machine_mem_size = 15
     String docker_image
     Int preemptible_tries
+    Boolean no_address 
   }
     Float output_bam_size = size(input_cram, "GB") / 0.60
     Float ref_size = size(ref_fasta, "GB") + size(ref_fasta_index, "GB") + size(ref_dict, "GB")
@@ -105,6 +109,7 @@ task CramToBamTask {
     memory: machine_mem_size + " GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
+    no_address: no_address
   }
     
   #Outputs a BAM and BAI with the same sample name
@@ -122,6 +127,7 @@ task ValidateSamFile {
     Int machine_mem_size = 4
     String docker_image
     Int preemptible_tries
+    Boolean no_address
   }
     String output_name = basename(input_bam, ".bam") + ".validation_report"
     Int disk_size = ceil(size(input_bam, "GB")) + addtional_disk_size
@@ -142,6 +148,7 @@ task ValidateSamFile {
     memory: machine_mem_size + " GB"
     disks: "local-disk " + disk_size + " HDD"
     preemptible: preemptible_tries
+    no_address: no_address
     continueOnReturnCode: [0,1]
   }
   #A text file is generated that will list errors or warnings that apply. 

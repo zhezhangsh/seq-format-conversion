@@ -34,7 +34,7 @@ workflow CramToBamFlow {
     String sample_name
     String gotc_docker = "us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.4.7-1603303710"
     Int preemptible_tries = 3
-    Boolean no_address = "false"
+    Boolean no_address = false
   }
 
   #converts CRAM to SAM to BAM and makes BAI

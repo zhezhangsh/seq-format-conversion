@@ -1,3 +1,5 @@
+Customization of the same [GATK4 workflow](https://github.com/gatk-workflows/seq-format-conversion)
+
 # seq-format-conversion
 Workflows for converting between sequence data formats
 
